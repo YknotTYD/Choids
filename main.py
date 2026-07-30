@@ -12,9 +12,14 @@ from   helpers import get_frame_durations_delta_t, get_new_delta_t_frame_duratio
 class ChoidManager:
 
     def __init__(self, choid_count: int) -> None:
+
         self.choids_pos =  np.random.randint(0, 1000, (choid_count, 2)).astype(np.float32)
         self.choids_vel = (np.random.random((choid_count, 2)) - 0.5) * 150
-        self.choid_max_speed = (np.random.random(choid_count) + 0.2) * 100
+        self.choid_max_speed = np.random.randint(
+            constants.CHOID_SPEED_RANGE[0],
+            constants.CHOID_SPEED_RANGE[1] + 1,
+            choid_count
+        )
 
         self.choid_count = choid_count
         return None
@@ -27,6 +32,12 @@ class ChoidManager:
 
             distance  = np.linalg.norm(away, axis = 1)
             valid_ids = (distance <= constants.CHOID_AVOIDANCE_RADIUS) & (distance > 0)
+
+            vects  = self.choids_pos - choid
+            angles = np.arctan2(vects[:, 1], vects[:, 0])
+            angles = np.abs(angles)
+
+            valid_ids = valid_ids & (angles < (3.14159265358979323846264338327950288419716939937510582097494459 * 0.7))
 
             away = away[valid_ids]
             distance  = distance[valid_ids]
@@ -50,6 +61,9 @@ class ChoidManager:
 
         self.choids_pos += self.choids_vel * delta_t
         self.choids_pos = np.fmod(self.choids_pos, constants.SCREEN_SIZE)
+        for i in range(2):
+            self.choids_pos[:,i][self.choids_pos[:,i] < i] = constants.SCREEN_SIZE[i]
+        #self.choids_pos[0] = np.array(pygame.mouse.get_pos())
 
         return None
 
@@ -67,7 +81,7 @@ def main() -> None:
 
     screen = pygame.display.set_mode(constants.SCREEN_SIZE, pygame.RESIZABLE)
     abort  = False
-    choid_manager = ChoidManager(200)
+    choid_manager = ChoidManager(350)
     frame_durations, delta_t = get_frame_durations_delta_t()
 
     while not abort:
