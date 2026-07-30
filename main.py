@@ -5,7 +5,10 @@ import constants
 import numpy as np
 import time
 import Choid
-from   helpers import get_frame_durations_delta_t, get_new_delta_t_frame_durations, fill_background
+from   helpers import (
+    get_frame_durations_delta_t, get_new_delta_t_frame_durations,
+    fill_background, scale_to_screen_size, get_window_size
+)
 
 #cap angular velocity
 # TODO: resizable/fullscreen
@@ -14,7 +17,10 @@ from   helpers import get_frame_durations_delta_t, get_new_delta_t_frame_duratio
 
 def main() -> None:
 
-    screen = pygame.display.set_mode(constants.SCREEN_SIZE)
+    window = pygame.Window("Choids", constants.SCREEN_SIZE, resizable = True)
+    screen = pygame.Surface(constants.SCREEN_SIZE)
+    fullscreen = False
+
     abort  = False
     choid_manager = Choid.ChoidManager(200)
     choid_ui      = Choid.ChoidUI()
@@ -30,12 +36,21 @@ def main() -> None:
         fill_background(screen)
         choid_manager.display(screen)
         choid_ui.display_ui(choid_manager, screen, delta_t)
+        scale_to_screen_size(window.get_surface(), screen)
 
-        pygame.display.flip()
+        window.flip()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 abort = True
+                break
+            if event.type == pygame.WINDOWMAXIMIZED:
+                fullscreen = True
+            if event.type == pygame.WINDOWRESIZED:
+                if fullscreen:
+                    fullscreen = False
+                    continue
+                window.size = get_window_size(window)
 
         delta_t, frame_durations = get_new_delta_t_frame_durations(
             frame_durations, frame_start
