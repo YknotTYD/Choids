@@ -25,6 +25,9 @@ class ChoidManager:
 
         pygame.init()
         self.font = pygame.font.SysFont("consolas", 18)
+
+        self.last_forces = {"cohesion": []}
+
         return None
 
     def _remove_choids_from_obstacles(self) -> None:
@@ -175,6 +178,8 @@ class ChoidManager:
         obstacle  = self._obstacle_force(i)
         goal      = self._goal_force(i)
 
+        self.last_forces["cohesion"].append(cohesion)
+
         steer = (self.choids_vel[i] * 0.00 + obstacle + goal + avoidance + alignment + cohesion)
 
         self.choids_vel[i] = self.choids_vel[i] + 0.2 * steer
@@ -198,6 +203,8 @@ class ChoidManager:
 
     def update(self, delta_t: float) -> None:
 
+        self.last_forces["cohesion"] = []
+
         for i, choid in enumerate(self.choids_pos):
             self._update_choid_velocity(i, choid)
 
@@ -218,19 +225,28 @@ class ChoidManager:
         for x, y, r in constants.OBSTACLES:
             pygame.draw.aacircle(screen, (22, 22, 88), (x, y), r)
 
-        for pos, vel in zip(self.choids_pos, self.choids_vel):
+        for i, (pos, vel) in enumerate(zip(self.choids_pos, self.choids_vel)):
 
             norm  = vel / np.linalg.norm(vel, axis = 0)
             top   = pos + norm * constants.CHOID_RENDER_H
             angle = np.atan2(norm[1], norm[0])
 
-            left  = angle + 3.1415926/2
-            right = angle - 3.1415926/2
+            left  = angle + 3.1415926 / 2
+            right = angle - 3.1415926 / 2
 
             left  = pos + np.array([np.cos(left), np.sin(left)])   * constants.CHOID_RENDER_W / 2
             right = pos + np.array([np.cos(right), np.sin(right)]) * constants.CHOID_RENDER_W / 2
 
-            pygame.draw.polygon(screen, "white", (left, right, top))
+            if i >= len(self.last_forces["cohesion"]): # just in case
+                color = "white"
+            else:
+                larp  = np.linalg.norm((self.last_forces["cohesion"][i]), axis = 0)
+                larp  = min(larp, constants.CHOID_RENDER_COHESION_COLOR_RANGE)
+                larp /= constants.CHOID_RENDER_COHESION_COLOR_RANGE
+                color = (255 * larp, 255 - 255 * larp, 0)
+
+            pygame.draw.polygon(screen, color, (left, right, top))
+
             #pygame.draw.aacircle(screen, "red", pos.astype(np.int64), 4)
 
         return None
