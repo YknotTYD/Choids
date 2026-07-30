@@ -226,7 +226,7 @@ class ChoidManager:
         for i, choid in enumerate(self.choids_pos):
             self._update_choid_velocity(i, choid)
 
-        self.choids_pos += self.choids_vel * delta_t
+        self.choids_pos += self.choids_vel * delta_t * constants.TIME_SCALING_FACTOR
         self._wrap_positions()
 
         return None
@@ -237,7 +237,7 @@ class ChoidManager:
             pygame.draw.aacircle(screen, "yellow", goal, 4)
 
         for x, y, r in constants.OBSTACLES:
-            pygame.draw.aacircle(screen, (22, 22, 88), (x, y), r)
+            pygame.draw.aacircle(screen, constants.OBSTACLE_RENDER_COLOR, (x, y), r)
 
         for i, (pos, vel) in enumerate(zip(self.choids_pos, self.choids_vel)):
 

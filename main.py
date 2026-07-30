@@ -10,14 +10,14 @@ from   helpers import (
     fill_background, scale_to_screen_size, get_window_size
 )
 
-#cap angular velocity
-# TODO: resizable/fullscreen
-# TODO: cusor thing
-# TODO: add menu: the ability to slow down/pause/speedup, goal count
+# TODO: (cap angular velocity)?
+# TODO: goal count
+# TODO: add a button to follow a guy
+# TODO: check if window is currently being resized or otherwise add a timer to prevent jittering on resize
 
 def main() -> None:
 
-    window = pygame.Window("Choids", constants.SCREEN_SIZE, resizable = True)
+    window = pygame.Window("Chud-oids simulator", constants.SCREEN_SIZE, resizable = True)
     screen = pygame.Surface(constants.SCREEN_SIZE)
     fullscreen = False
 

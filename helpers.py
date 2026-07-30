@@ -43,6 +43,6 @@ def get_window_size(window: pygame.Window) -> tuple[int, int]:
 
 def scale_to_screen_size(window_surface, screen: pygame.Surface) -> None:
     scale = window_surface.get_width() / constants.SCREEN_SIZE[0]
-    scaled = pygame.transform.scale_by(screen, scale)
+    scaled = pygame.transform.smoothscale_by(screen, scale)
     window_surface.blit(scaled, (0, 0))
     return None
