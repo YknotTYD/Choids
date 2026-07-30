@@ -174,7 +174,7 @@ class ChoidManager:
 
         vects  = self.choids_pos - choid
         angles = np.abs(np.arctan2(vects[:, 1], vects[:, 0]))
-        valid_fov = angles < (3.14159265358979323846264338327950288419716939937510582097494459 * constants.CHOID_FOV / 180)
+        valid_fov = angles < (constants.PI * constants.CHOID_FOV / 180)
 
         avoid_ids, align_ids, cohes_ids = self._neighbor_masks(distance, valid_fov)
 
@@ -245,8 +245,8 @@ class ChoidManager:
             top   = pos + norm * constants.CHOID_RENDER_H
             angle = np.atan2(norm[1], norm[0])
 
-            left  = angle + 3.1415926 / 2
-            right = angle - 3.1415926 / 2
+            left  = angle + constants.PI / 2
+            right = angle - constants.PI / 2
 
             left  = pos + np.array([np.cos(left), np.sin(left)])   * constants.CHOID_RENDER_W / 2
             right = pos + np.array([np.cos(right), np.sin(right)]) * constants.CHOID_RENDER_W / 2

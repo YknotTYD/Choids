@@ -4,6 +4,8 @@ import Choid
 import pygame
 import constants
 import numpy as np
+import math
+import time
 
 def _modify_avoidance_radius(self, value: int, choid_manager: Choid.ChoidManager) -> None:
     constants.CHOID_AVOIDANCE_RADIUS += value * 25
@@ -83,6 +85,15 @@ class ChoidUI:
 
         return None
 
+    @staticmethod
+    def triangle_offset() -> float:
+        return (
+            (
+                math.cos(time.time() * 2 * constants.PI / constants.CHOID_RENDER_TRIANGLE_DURATION) -
+                constants.CHOID_RENDER_TRIANGLE_DURATION / 2
+            ) * constants.CHOID_RENDER_TRIANGLE_AMPLITUDE
+        )
+
     def display_ui(
             self, choid_manager: Choid.ChoidManager,
             screen: pygame.display, delta_t: float
@@ -122,6 +133,9 @@ class ChoidUI:
         panel.fill((0, 0, 0, 140))
         screen.blit(panel, (10, 10))
 
+        triangle_h = 10
+        triangle_w = 5
+        triangle   = ((0, -triangle_w), (0, +triangle_w), (triangle_h, 0))
         line_index = -1
 
         for i, (line_index_offset, is_modifiable, line) in enumerate(lines):
@@ -132,11 +146,13 @@ class ChoidUI:
             surf = choid_manager.font.render(line, True, (230, 230, 230))
 
             if line_index == self.cursor_index and line_index_offset:
-                pygame.draw.circle(
+                pygame.draw.polygon(
                     screen,
                     "green" if is_modifiable else "red",
-                    (24 + 5, pos[1] + surf.get_height() / 2),
-                    5
+                    [
+                        (24 + c0 + ChoidUI.triangle_offset(), pos[1] + surf.get_height() / 2 + c1)
+                            for c0, c1 in triangle
+                    ],
                 )
 
             screen.blit(surf, pos)
