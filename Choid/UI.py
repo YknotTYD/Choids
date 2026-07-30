@@ -14,16 +14,23 @@ class UI:
 
         lines = [
             f"mouse : {pygame.mouse.get_pos()}",
+            "",
             f"choids: {self.choid_count}",
             f"avoidance radius: {constants.CHOID_AVOIDANCE_RADIUS}",
             f"alignment radius: {constants.CHOID_ALIGNMENT_RADIUS}",
             f"cohesion  radius: {constants.CHOID_COHESION_RADIUS}",
+            "",
             f"choid fov: {constants.CHOID_FOV}%",
             f"speed min: {speeds.min():.0f}",
             f"speed avg: {speeds.mean():.0f}",
             f"speed max: {speeds.max():.0f}",
             f"framerate: {round(1 / delta_t, 1)} fps",
-            f"current force: {self.current_last_force}"
+            f"current force: {constants.FORCES[self.current_last_force]}",
+            "",
+            "[controls]:",
+            "",
+            "[up/down]:",
+            "   change current force"
         ]
 
         padding = 8

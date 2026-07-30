@@ -4,6 +4,8 @@ import pygame
 import numpy as np
 import constants
 
+_FORCES = constants.FORCES
+
 class ChoidManager:
 
     def __init__(self, choid_count: int) -> None:
@@ -27,10 +29,10 @@ class ChoidManager:
         self.font = pygame.font.SysFont("consolas", 18)
 
         self.last_forces = dict()
-        for key in ("cohesion", "avoidance", "alignment", "obstacle", "goal"):
+        for key in _FORCES:
             self.last_forces[key] = []
 
-        self.current_last_force = tuple(self.last_forces.keys())[0]
+        self.current_last_force = 0
 
         return None
 
@@ -210,10 +212,25 @@ class ChoidManager:
 
         return None
 
-    def update(self, delta_t: float) -> None:
+    def _update_last_force(self) -> None:
 
         for key in self.last_forces.keys():
             self.last_forces[key] = []
+
+        if (pygame.key.get_just_pressed()[pygame.K_UP]):
+            self.current_last_force += 1
+            self.current_last_force %= len(_FORCES)
+
+        if (pygame.key.get_just_pressed()[pygame.K_DOWN]):
+            self.current_last_force -= 1
+            if self.current_last_force < 0:
+                self.current_last_force = len(_FORCES) - 1
+
+        return None
+
+    def update(self, delta_t: float) -> None:
+
+        self._update_last_force()
 
         for i, choid in enumerate(self.choids_pos):
             self._update_choid_velocity(i, choid)
@@ -224,10 +241,6 @@ class ChoidManager:
         return None
 
     def display(self, screen: pygame.display) -> None:
-
-        for pos, vel in zip(self.choids_pos, self.choids_vel):
-            break
-            pygame.draw.aaline(screen, "green", pos.astype(np.int64), pos + vel * 0.2, 2)
 
         for goal in self.goals:
             pygame.draw.aacircle(screen, "yellow", goal, 4)
@@ -247,11 +260,11 @@ class ChoidManager:
             left  = pos + np.array([np.cos(left), np.sin(left)])   * constants.CHOID_RENDER_W / 2
             right = pos + np.array([np.cos(right), np.sin(right)]) * constants.CHOID_RENDER_W / 2
 
-            if i >= len(self.last_forces[self.current_last_force]): # just in case
+            if i >= len(self.last_forces[_FORCES[self.current_last_force]]): # just in case
                 color = "white"
             else:
-                color_range = constants.CHOID_RENDER_FORCE_COLOR_RANGE[self.current_last_force]
-                larp  = np.linalg.norm((self.last_forces[self.current_last_force][i]), axis = 0)
+                color_range = constants.CHOID_RENDER_FORCE_COLOR_RANGE[_FORCES[self.current_last_force]]
+                larp  = np.linalg.norm((self.last_forces[_FORCES[self.current_last_force]][i]), axis = 0)
                 larp  = min(larp, color_range) / color_range
                 color = (255 * larp, 255 - 255 * larp, 0)
 

@@ -23,8 +23,10 @@ GOAL_COUNT = 3
 CHOID_RENDER_W = 10
 CHOID_RENDER_H = 10
 
+FORCES = ("cohesion", "avoidance", "alignment", "obstacle", "goal")
 CHOID_RENDER_FORCE_COLOR_RANGE = {
     "cohesion":   60, "avoidance": 100,
     "alignment":  60, "obstacle":   30,
     "goal":      140,
 }
+
