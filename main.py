@@ -7,13 +7,11 @@ import time
 import Choid
 from   helpers import (
     get_frame_durations_delta_t, get_new_delta_t_frame_durations,
-    fill_background, scale_to_screen_size,
-    get_window_size, process_events
+    fill_background, scale_to_screen_size, process_events
 )
 
 # TODO: proper documentation
 # TODO: prevent choids from spawning into each other
-# TODO: make subfuntions to get new pos/vel/speed values
 
 def main() -> None:
 
