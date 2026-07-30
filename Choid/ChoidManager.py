@@ -18,8 +18,10 @@ class ChoidManager:
         )
 
         self.choid_count = choid_count
-        self.goal = None
-        self._update_goal()
+        self.goals = [None] * constants.GOAL_COUNT
+
+        for i in range(constants.GOAL_COUNT):
+            self._update_goal(i)
 
         pygame.init()
         self.font = pygame.font.SysFont("consolas", 18)
@@ -34,6 +36,7 @@ class ChoidManager:
             while is_invalid:
 
                 is_invalid = False
+
                 for x, y, r in constants.OBSTACLES:
                     if np.linalg.norm(self.choids_pos[i] - np.array((x, y)), axis = 0) <= (r + constants.CHOID_OBSTACLE_MARGIN):
                         is_invalid = True
@@ -42,35 +45,35 @@ class ChoidManager:
 
         return None
 
-    def _set_random_goal(self) -> None:
+    def _set_random_goal(self, i: int) -> None:
 
         is_invalid = True
 
         while is_invalid:
 
-            self.goal = np.array([np.random.randint(0, constants.SCREEN_SIZE[i]) for i in range(2)])
+            self.goals[i] = np.array([np.random.randint(50, constants.SCREEN_SIZE[i] - 50) for i in range(2)])
             is_invalid = False
 
             for x, y, r in constants.OBSTACLES:
-                if np.linalg.norm(self.goal - np.array((x, y)), axis = 0) <= (r + constants.CHOID_OBSTACLE_MARGIN):
+                if np.linalg.norm(self.goals[i] - np.array((x, y)), axis = 0) <= (r + constants.CHOID_OBSTACLE_MARGIN):
                     is_invalid = True
                     break
 
         return None
 
-    def _update_goal(self) -> None:
+    def _update_goal(self, i: int) -> None:
 
-        if self.goal is None:
-            self._set_random_goal()
+        if self.goals[i] is None:
+            self._set_random_goal(i)
             return None
 
         if pygame.mouse.get_focused():
             pass#return None
 
-        norms = np.linalg.norm(self.choids_pos - self.goal, axis = 1)
+        norms = np.linalg.norm(self.choids_pos - self.goals[i], axis = 1)
 
         if np.any(norms < 8):
-            self._set_random_goal()
+            self._set_random_goal(i)
 
         return None
 
@@ -121,15 +124,20 @@ class ChoidManager:
 
         return steer
 
-    def _get_goal_pos(self) -> np.array:
+    def _get_goal_index(self, i: int) -> int:
 
         if pygame.mouse.get_focused():
             pass#return np.array(pygame.mouse.get_pos())
-            
-        return self.goal
 
-    def _goal_force(self, i, strength = 100, arrive_radius = 60):
-        goal = np.array(self._get_goal_pos()) - self.choids_pos[i]
+        dist = np.linalg.norm(np.array(self.goals) - self.choids_pos[i], axis = 1)
+        return np.argmin(dist)
+
+    def _goal_force(self, i, strength = 100, arrive_radius = 60) -> np.array:
+
+        if constants.GOAL_COUNT == 0:
+            return np.array((0, 0))
+
+        goal = np.array(self.goals[self._get_goal_index(i)]) - self.choids_pos[i]
         dist = np.linalg.norm(goal)
         if dist == 0:
             return np.zeros(2, dtype = np.float32)
@@ -171,15 +179,22 @@ class ChoidManager:
 
         self.choids_vel[i] = self.choids_vel[i] + 0.2 * steer
         self._limit_speed(i)
-        self._update_goal()
+
+        for i in range(constants.GOAL_COUNT):
+            self._update_goal(i)
 
         return None
 
-    def _wrap_positions(self):
+    def _wrap_positions(self) -> None:
+
+        if constants.GOAL_COUNT > 0:
+            return None
+
         for i in range(2):
-            break
             self.choids_pos[:,i][self.choids_pos[:,i] > constants.SCREEN_SIZE[i]] = 0
             self.choids_pos[:,i][self.choids_pos[:,i] < 0] = constants.SCREEN_SIZE[i]
+
+        return None
 
     def update(self, delta_t: float) -> None:
 
@@ -196,7 +211,8 @@ class ChoidManager:
         for pos, vel in zip(self.choids_pos, self.choids_vel):
             pygame.draw.aaline(screen, "green", pos.astype(np.int64), pos + vel * 0.2, 2)
 
-        pygame.draw.aacircle(screen, "yellow", self.goal, 4)
+        for goal in self.goals:
+            pygame.draw.aacircle(screen, "yellow", goal, 4)
 
         for x, y, r in constants.OBSTACLES:
             pygame.draw.aacircle(screen, (22, 22, 88), (x, y), r)

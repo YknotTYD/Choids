@@ -13,14 +13,15 @@ class UI:
         speeds = np.linalg.norm(self.choids_vel, axis = 1)
 
         lines = [
-            f"choids:    {self.choid_count}",
+            f"mouse : {pygame.mouse.get_pos()}",
+            f"choids: {self.choid_count}",
+            f"avoidance radius: {constants.CHOID_AVOIDANCE_RADIUS}",
+            f"alignment radius: {constants.CHOID_ALIGNMENT_RADIUS}",
+            f"cohesion  radius: {constants.CHOID_COHESION_RADIUS}",
+            f"choid fov: {constants.CHOID_FOV}%",
             f"speed min: {speeds.min():.0f}",
             f"speed avg: {speeds.mean():.0f}",
             f"speed max: {speeds.max():.0f}",
-            f"avoidance radius:  {constants.CHOID_AVOIDANCE_RADIUS}",
-            f"alignment radius:  {constants.CHOID_ALIGNMENT_RADIUS}",
-            f"cohesion  radius:  {constants.CHOID_COHESION_RADIUS}",
-            f"mouse: {pygame.mouse.get_pos()}",
             f"framerate: {round(1 / delta_t, 1)} fps",
         ]
 
