@@ -9,6 +9,7 @@ class ChoidManager:
     def __init__(self, choid_count: int) -> None:
 
         self.choids_pos =  np.random.randint(0, 1000, (choid_count, 2)).astype(np.float32)
+        self._remove_choids_from_obstacles()
         self.choids_vel = (np.random.random((choid_count, 2)) - 0.5) * 150
         self.choid_max_speed = np.random.randint(
             constants.CHOID_SPEED_RANGE[0],
@@ -22,6 +23,23 @@ class ChoidManager:
 
         pygame.init()
         self.font = pygame.font.SysFont("consolas", 18)
+        return None
+
+    def _remove_choids_from_obstacles(self) -> None:
+
+        for i in range(len(self.choids_pos)):
+
+            is_invalid = True
+
+            while is_invalid:
+
+                is_invalid = False
+                for x, y, r in constants.OBSTACLES:
+                    if np.linalg.norm(self.choids_pos[i] - np.array((x, y)), axis = 0) <= (r + constants.CHOID_OBSTACLE_MARGIN):
+                        is_invalid = True
+                        self.choids_pos[i] = np.random.randint(0, 1000, (2,))
+                        break
+
         return None
 
     def _set_random_goal(self) -> None:
