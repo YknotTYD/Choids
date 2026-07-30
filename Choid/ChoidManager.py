@@ -191,7 +191,7 @@ class ChoidManager:
         ):
             self.last_forces[key].append(value)
 
-        steer = (self.choids_vel[i] * 0.00 + obstacle + goal + avoidance + alignment + cohesion)
+        steer = (obstacle + goal + avoidance + alignment + cohesion)
 
         self.choids_vel[i] = self.choids_vel[i] + 0.2 * steer
         self._limit_speed(i)

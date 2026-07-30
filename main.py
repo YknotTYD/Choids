@@ -11,7 +11,6 @@ from   helpers import (
     get_window_size, process_events
 )
 
-# TODO: fix follow
 # TODO: add goal count + minimum/maximum speed + choid count to the panel
 # TODO: make follow scaling modifiable
 

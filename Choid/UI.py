@@ -128,7 +128,7 @@ class ChoidUI:
         center_xy_bounds = [
             (
                 constants.SCREEN_SIZE[i] * (1 - 1 / (constants.FOLLOW_SCALING_FACTOR * 2)),
-                constants.SCREEN_SIZE[i] / 2 / constants.FOLLOW_SCALING_FACTOR
+                constants.SCREEN_SIZE[i] / (constants.FOLLOW_SCALING_FACTOR * 2)
             )
             for i in range(2)
         ]
@@ -178,17 +178,17 @@ class ChoidUI:
             (1, 0, f"framerate: {round(1 / delta_t, 1)} fps"),
             (1, 1, f"current force: {constants.FORCES[choid_manager.current_last_force]}"),
             (1, 1, f"time scaling:  {constants.TIME_SCALING_FACTOR}"),
-            (0, 0, ""                  ),
-            (0, 0, "[controls]:"       ),
-            (0, 0, ""                  ),
-            (0, 0, "[up/down]:"        ),
-            (0, 0, "   move cursor"    ),
-            (0, 0, "[left/right]:"     ),
-            (0, 0, "   modify value"   ),
-            (0, 0, "[enter]:"    ),
-            (0, 0, "   follow/unfollow"),
-            (0, 0, "[space]:"    ),
-            (0, 0, "   hide/unhide panel"),
+            (0, 0, ""                        ),
+            (0, 0, "[controls]:"             ),
+            (0, 0, ""                        ),
+            (0, 0, "[up/down]:"              ),
+            (0, 0, "  move cursor"           ),
+            (0, 0, "[left/right]:"           ),
+            (0, 0, "  modify value"          ),
+            (0, 0, "[enter]:"                ),
+            (0, 0, "  toggle spectating mode"),
+            (0, 0, "[space]:"                ),
+            (0, 0, "  hide/unhide panel"     ),
         ]
 
         padding = 8
