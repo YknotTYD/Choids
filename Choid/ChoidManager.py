@@ -217,15 +217,6 @@ class ChoidManager:
         for key in self.last_forces.keys():
             self.last_forces[key] = []
 
-        if (pygame.key.get_just_pressed()[pygame.K_UP]):
-            self.current_last_force += 1
-            self.current_last_force %= len(_FORCES)
-
-        if (pygame.key.get_just_pressed()[pygame.K_DOWN]):
-            self.current_last_force -= 1
-            if self.current_last_force < 0:
-                self.current_last_force = len(_FORCES) - 1
-
         return None
 
     def update(self, delta_t: float) -> None:

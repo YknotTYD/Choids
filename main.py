@@ -7,7 +7,6 @@ import time
 import Choid
 from   helpers import get_frame_durations_delta_t, get_new_delta_t_frame_durations, fill_background
 
-#multiple boid groups
 #cap angular velocity
 # TODO: resizable/fullscreen
 # TODO: cusor thing
@@ -18,6 +17,7 @@ def main() -> None:
     screen = pygame.display.set_mode(constants.SCREEN_SIZE)
     abort  = False
     choid_manager = Choid.ChoidManager(200)
+    choid_ui      = Choid.ChoidUI()
     frame_durations, delta_t = get_frame_durations_delta_t()
 
     while not abort:
@@ -25,10 +25,11 @@ def main() -> None:
         frame_start = time.time()
 
         choid_manager.update(delta_t)
+        choid_ui.update(choid_manager)
 
         fill_background(screen)
         choid_manager.display(screen)
-        Choid.UI.display_ui(choid_manager, screen, delta_t)
+        choid_ui.display_ui(choid_manager, screen, delta_t)
 
         pygame.display.flip()
 
