@@ -8,7 +8,7 @@ import numpy as np
 class UI:
 
     @staticmethod
-    def display_ui(self: Choid, screen: pygame.display, delta_t: float) -> None:
+    def display_ui(self: Choid.ChoidManager, screen: pygame.display, delta_t: float) -> None:
 
         speeds = np.linalg.norm(self.choids_vel, axis = 1)
 
@@ -23,11 +23,12 @@ class UI:
             f"speed avg: {speeds.mean():.0f}",
             f"speed max: {speeds.max():.0f}",
             f"framerate: {round(1 / delta_t, 1)} fps",
+            f"current force: {self.current_last_force}"
         ]
 
         padding = 8
         line_height = 20
-        box_w = 260
+        box_w = 280
         box_h = padding * 2 + line_height * len(lines)
 
         panel = pygame.Surface((box_w, box_h), pygame.SRCALPHA)

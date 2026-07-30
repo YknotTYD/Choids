@@ -26,7 +26,11 @@ class ChoidManager:
         pygame.init()
         self.font = pygame.font.SysFont("consolas", 18)
 
-        self.last_forces = {"cohesion": []}
+        self.last_forces = dict()
+        for key in ("cohesion", "avoidance", "alignment", "obstacle", "goal"):
+            self.last_forces[key] = []
+
+        self.current_last_force = tuple(self.last_forces.keys())[0]
 
         return None
 
@@ -178,7 +182,12 @@ class ChoidManager:
         obstacle  = self._obstacle_force(i)
         goal      = self._goal_force(i)
 
-        self.last_forces["cohesion"].append(cohesion)
+        for key, value in (
+            ("avoidance", avoidance), ("alignment", alignment),
+            ("cohesion",  cohesion),  ("obstacle",  obstacle),
+            ("goal",      goal)
+        ):
+            self.last_forces[key].append(value)
 
         steer = (self.choids_vel[i] * 0.00 + obstacle + goal + avoidance + alignment + cohesion)
 
@@ -203,7 +212,8 @@ class ChoidManager:
 
     def update(self, delta_t: float) -> None:
 
-        self.last_forces["cohesion"] = []
+        for key in self.last_forces.keys():
+            self.last_forces[key] = []
 
         for i, choid in enumerate(self.choids_pos):
             self._update_choid_velocity(i, choid)
@@ -237,16 +247,14 @@ class ChoidManager:
             left  = pos + np.array([np.cos(left), np.sin(left)])   * constants.CHOID_RENDER_W / 2
             right = pos + np.array([np.cos(right), np.sin(right)]) * constants.CHOID_RENDER_W / 2
 
-            if i >= len(self.last_forces["cohesion"]): # just in case
+            if i >= len(self.last_forces[self.current_last_force]): # just in case
                 color = "white"
             else:
-                larp  = np.linalg.norm((self.last_forces["cohesion"][i]), axis = 0)
-                larp  = min(larp, constants.CHOID_RENDER_COHESION_COLOR_RANGE)
-                larp /= constants.CHOID_RENDER_COHESION_COLOR_RANGE
+                color_range = constants.CHOID_RENDER_FORCE_COLOR_RANGE[self.current_last_force]
+                larp  = np.linalg.norm((self.last_forces[self.current_last_force][i]), axis = 0)
+                larp  = min(larp, color_range) / color_range
                 color = (255 * larp, 255 - 255 * larp, 0)
 
             pygame.draw.polygon(screen, color, (left, right, top))
-
-            #pygame.draw.aacircle(screen, "red", pos.astype(np.int64), 4)
 
         return None
