@@ -129,7 +129,7 @@ MODIFICATION_TABLE = {
     7:  None,                     #speed min
     8:  None,                     #speed avg
     9:  None,                     #speed max
-    10: None,                    #framerate
+    10: None,                     #framerate
     11: _modify_current_force,    #current force
     12: _modify_time_scaling,     #time scaling
     13: _modify_follow_scaling,   #spectating scaling
@@ -264,7 +264,7 @@ class ChoidUI:
             (0, 0, "[enter]:"                ),
             (0, 0, "  toggle spectating mode"),
             (0, 0, "[space]:"                ),
-            (0, 0, "  hide/unhide panel"     ),
+            (0, 0, "  hide/show panel"       ),
         ]
 
         padding = 8
