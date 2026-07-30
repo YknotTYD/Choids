@@ -123,7 +123,21 @@ class ChoidUI:
             choid_manager: Choid.ChoidManager
         ) -> None:
 
-        screen_center = choid_manager.choids_pos[self.follow_index]
+        screen_center = choid_manager.choids_pos[self.follow_index].copy()
+
+        center_xy_bounds = [
+            (
+                constants.SCREEN_SIZE[i] * (1 - 1 / (constants.FOLLOW_SCALING_FACTOR * 2)),
+                constants.SCREEN_SIZE[i] / 2 / constants.FOLLOW_SCALING_FACTOR
+            )
+            for i in range(2)
+        ]
+
+        pygame.draw.circle(screen, "blue", (int(screen_center[0]), int(screen_center[1])), 5)
+
+        for i, bounds in enumerate(center_xy_bounds):
+            screen_center[i] = max(min(screen_center[i], bounds[0]), bounds[1])
+
         blit_pos = [
             int(coord - constants.SCREEN_SIZE[i] / (constants.FOLLOW_SCALING_FACTOR * 2))
                 for i, coord in enumerate(screen_center)
