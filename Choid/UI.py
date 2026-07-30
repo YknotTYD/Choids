@@ -38,7 +38,14 @@ def _modify_current_force(self, value: int, choid_manager: Choid.ChoidManager) -
 
 def _modify_time_scaling(self, value: int, choid_manager: Choid.ChoidManager) -> None:
 
-    constants.TIME_SCALING_FACTOR += value * 0.1
+    if value == 1:
+        value *= 0.1 if constants.TIME_SCALING_FACTOR < 1.0 else 0.2
+    elif value == -1:
+        value *= 0.1 if constants.TIME_SCALING_FACTOR <= 1.0 else 0.2
+    else:
+        return None
+
+    constants.TIME_SCALING_FACTOR += value
     constants.TIME_SCALING_FACTOR = round(constants.TIME_SCALING_FACTOR, 1)
     constants.TIME_SCALING_FACTOR = max(constants.TIME_SCALING_FACTOR, 0)
 
