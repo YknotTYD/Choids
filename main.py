@@ -5,10 +5,13 @@ import constants
 import numpy as np
 import time
 import Choid
-from   helpers import get_frame_durations_delta_t, get_new_delta_t_frame_durations
+from   helpers import get_frame_durations_delta_t, get_new_delta_t_frame_durations, fill_background
 
 #multiple boid groups
 #cap angular velocity
+# TODO: resizable/fullscreen
+# TODO: cusor thing
+# TODO: add menu: the ability to slow down/pause/speedup, goal count
 
 def main() -> None:
 
@@ -23,7 +26,7 @@ def main() -> None:
 
         choid_manager.update(delta_t)
 
-        screen.fill(constants.BACKGROUND_COLOR)
+        fill_background(screen)
         choid_manager.display(screen)
         Choid.UI.display_ui(choid_manager, screen, delta_t)
 

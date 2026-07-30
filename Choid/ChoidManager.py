@@ -266,7 +266,8 @@ class ChoidManager:
                 color_range = constants.CHOID_RENDER_FORCE_COLOR_RANGE[_FORCES[self.current_last_force]]
                 larp  = np.linalg.norm((self.last_forces[_FORCES[self.current_last_force]][i]), axis = 0)
                 larp  = min(larp, color_range) / color_range
-                color = (255 * larp, 255 - 255 * larp, 0)
+                larp_correction = 0.5 - abs(larp - 0.5)
+                color = (255 * larp + 255 * larp_correction, 255 - 255 * larp + 255 * larp_correction, 0)
 
             pygame.draw.polygon(screen, color, (left, right, top))
 
