@@ -11,6 +11,7 @@ from   helpers import (
     get_window_size, process_events
 )
 
+# TODO: proper documentation
 # TODO: make subfuntions to get new pos/vel/speed values
 # TODO: add goal count to the panel
 

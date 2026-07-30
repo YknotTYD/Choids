@@ -98,21 +98,40 @@ def _modify_choid_count(self, value: int, choid_manager: Choid.ChoidManager) -> 
 
     return None
 
-LINE_COUNT = 13
+def _modify_goal_count(self, value: int, choid_manager: Choid.ChoidManager) -> None:
+
+    if value == 1:
+
+        choid_manager.goals.append(None)
+        choid_manager._update_goal(constants.GOAL_COUNT)
+        constants.GOAL_COUNT += 1
+
+        return None
+
+    if value != -1 or constants.GOAL_COUNT <= 0:
+        return None
+
+    choid_manager.goals = choid_manager.goals[:-1]
+    constants.GOAL_COUNT -= 1
+
+    return None
+
+LINE_COUNT = 14
 MODIFICATION_TABLE = {
     0:  None,                     #(1, 0, f"mouse : {pygame.mouse.get_pos()}"),
     1:  _modify_choid_count,      #(1, 1, f"choids: {choid_manager.choid_count}"),
-    2:  _modify_avoidance_radius, #(1, 1, f"avoidance radius: {constants.CHOID_AVOIDANCE_RADIUS}"),
-    3:  _modify_alignment_radius, #(1, 1, f"alignment radius: {constants.CHOID_ALIGNMENT_RADIUS}"),
-    4:  _modify_cohesion_radius,  #(1, 1, f"cohesion  radius: {constants.CHOID_COHESION_RADIUS}"),
-    5:  _modify_choid_fov,        #(1, 0, f"choid fov: {constants.CHOID_FOV}%"),
-    6:  None,                     #(1, 0, f"speed min: {speeds.min():.0f}"),
-    7:  None,                     #(1, 0, f"speed avg: {speeds.mean():.0f}"),
-    8:  None,                     #(1, 0, f"speed max: {speeds.max():.0f}"),
-    9:  None,                     #(1, 0, f"framerate: {round(1 / delta_t, 1)} fps"),
-    10: _modify_current_force,    #(1, 0, f"current force: {constants.FORCES[choid_manager.current_last_force]}"),
-    11: _modify_time_scaling,     #(1, 1, f"time scaling:  {constants.TIME_SCALING_FACTOR}"),
-    12: _modify_follow_scaling,   #(1, 1, f"spectating scaling: {constants.FOLLOW_SCALING_FACTOR}"),
+    2:  _modify_goal_count,       #(1, 1, f"food:  {constants.GOAL_COUNT}"),
+    3:  _modify_avoidance_radius, #(1, 1, f"avoidance radius: {constants.CHOID_AVOIDANCE_RADIUS}"),
+    4:  _modify_alignment_radius, #(1, 1, f"alignment radius: {constants.CHOID_ALIGNMENT_RADIUS}"),
+    5:  _modify_cohesion_radius,  #(1, 1, f"cohesion  radius: {constants.CHOID_COHESION_RADIUS}"),
+    6:  _modify_choid_fov,        #(1, 0, f"choid fov: {constants.CHOID_FOV}%"),
+    7:  None,                     #(1, 0, f"speed min: {speeds.min():.0f}"),
+    8:  None,                     #(1, 0, f"speed avg: {speeds.mean():.0f}"),
+    9:  None,                     #(1, 0, f"speed max: {speeds.max():.0f}"),
+    10:  None,                    #(1, 0, f"framerate: {round(1 / delta_t, 1)} fps"),
+    11: _modify_current_force,    #(1, 0, f"current force: {constants.FORCES[choid_manager.current_last_force]}"),
+    12: _modify_time_scaling,     #(1, 1, f"time scaling:  {constants.TIME_SCALING_FACTOR}"),
+    13: _modify_follow_scaling,   #(1, 1, f"spectating scaling: {constants.FOLLOW_SCALING_FACTOR}"),
 }
 
 class ChoidUI:
@@ -221,6 +240,7 @@ class ChoidUI:
             (1, 0, f"mouse : {pygame.mouse.get_pos()}"),
             (0, 0, ""),
             (1, 1, f"choids: {choid_manager.choid_count}"),
+            (1, 1, f"food:   {constants.GOAL_COUNT}"),
             (1, 1, f"avoidance radius: {constants.CHOID_AVOIDANCE_RADIUS}"),
             (1, 1, f"alignment radius: {constants.CHOID_ALIGNMENT_RADIUS}"),
             (1, 1, f"cohesion  radius: {constants.CHOID_COHESION_RADIUS}" ),
