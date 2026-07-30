@@ -209,6 +209,7 @@ class ChoidManager:
     def display(self, screen: pygame.display) -> None:
 
         for pos, vel in zip(self.choids_pos, self.choids_vel):
+            break
             pygame.draw.aaline(screen, "green", pos.astype(np.int64), pos + vel * 0.2, 2)
 
         for goal in self.goals:
@@ -217,7 +218,19 @@ class ChoidManager:
         for x, y, r in constants.OBSTACLES:
             pygame.draw.aacircle(screen, (22, 22, 88), (x, y), r)
 
-        for pos in self.choids_pos:
-            pygame.draw.aacircle(screen, "red", pos.astype(np.int64), 4)
+        for pos, vel in zip(self.choids_pos, self.choids_vel):
+
+            norm  = vel / np.linalg.norm(vel, axis = 0)
+            top   = pos + norm * constants.CHOID_RENDER_H
+            angle = np.atan2(norm[1], norm[0])
+
+            left  = angle + 3.1415926/2
+            right = angle - 3.1415926/2
+
+            left  = pos + np.array([np.cos(left), np.sin(left)])   * constants.CHOID_RENDER_W / 2
+            right = pos + np.array([np.cos(right), np.sin(right)]) * constants.CHOID_RENDER_W / 2
+
+            pygame.draw.polygon(screen, "white", (left, right, top))
+            #pygame.draw.aacircle(screen, "red", pos.astype(np.int64), 4)
 
         return None
