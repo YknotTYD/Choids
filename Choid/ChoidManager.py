@@ -8,16 +8,26 @@ _FORCES = constants.FORCES
 
 class ChoidManager:
 
-    def __init__(self, choid_count: int) -> None:
+    def _get_new_pos(self, count: int) -> np.array:
+        return np.random.randint(0, 1000, (count, 2)).astype(np.float32)
 
-        self.choids_pos =  np.random.randint(0, 1000, (choid_count, 2)).astype(np.float32)
-        self._remove_choids_from_obstacles()
-        self.choids_vel = (np.random.random((choid_count, 2)) - 0.5) * 150
-        self.choid_max_speed = np.random.randint(
+    def _get_new_vel(self, count: int) -> np.array:
+        return (np.random.random((count, 2)) - 0.5) * 150
+
+    def _get_new_max_speed(self, count: int) -> np.array:
+        return np.random.randint(
             constants.CHOID_SPEED_RANGE[0],
             constants.CHOID_SPEED_RANGE[1] + 1,
-            choid_count
+            count
         )
+
+    def __init__(self, choid_count: int) -> None:
+
+        self.choids_pos = self._get_new_pos(choid_count)
+        self._remove_choids_from_obstacles()
+
+        self.choids_vel = self._get_new_vel(choid_count)
+        self.choid_max_speed = self._get_new_max_speed(choid_count)
 
         self.choid_count = choid_count
         self.goals = [None] * constants.GOAL_COUNT

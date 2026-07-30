@@ -12,8 +12,8 @@ from   helpers import (
 )
 
 # TODO: proper documentation
+# TODO: prevent choids from spawning into each other
 # TODO: make subfuntions to get new pos/vel/speed values
-# TODO: add goal count to the panel
 
 def main() -> None:
 

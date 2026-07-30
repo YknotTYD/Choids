@@ -68,13 +68,9 @@ def _modify_choid_count(self, value: int, choid_manager: Choid.ChoidManager) -> 
 
     if value == 1:
 
-        new_pos = np.random.randint(0, 1000, (choid_amount, 2)).astype(np.float32)
-        new_vel = (np.random.random((choid_amount, 2)) - 0.5) * 150
-        new_max_speed = np.random.randint(
-            constants.CHOID_SPEED_RANGE[0],
-            constants.CHOID_SPEED_RANGE[1] + 1,
-            choid_amount
-        )
+        new_pos       = choid_manager._get_new_pos(choid_amount)
+        new_vel       = choid_manager._get_new_vel(choid_amount)
+        new_max_speed = choid_manager._get_new_max_speed(choid_amount)
 
         choid_manager.choids_pos      = np.concat((choid_manager.choids_pos, new_pos), axis = 0)
         choid_manager.choids_vel      = np.concat((choid_manager.choids_vel, new_vel), axis = 0)
@@ -82,7 +78,6 @@ def _modify_choid_count(self, value: int, choid_manager: Choid.ChoidManager) -> 
         choid_manager.choid_count    += choid_amount
 
         choid_manager._remove_choids_from_obstacles()
-
         return None
 
     if value != -1:
@@ -95,7 +90,6 @@ def _modify_choid_count(self, value: int, choid_manager: Choid.ChoidManager) -> 
     choid_manager.choids_vel      = choid_manager.choids_vel[:-choid_amount]
     choid_manager.choid_max_speed = choid_manager.choid_max_speed[:-choid_amount]
     choid_manager.choid_count    -= choid_amount
-
     return None
 
 def _modify_goal_count(self, value: int, choid_manager: Choid.ChoidManager) -> None:
