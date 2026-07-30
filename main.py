@@ -24,52 +24,82 @@ class ChoidManager:
         self.choid_count = choid_count
         return None
 
+    def _neighbor_masks(self, distance, valid_fov):
+        avoid_ids = (distance <= constants.CHOID_AVOIDANCE_RADIUS) & (distance > 0) & valid_fov
+        align_ids = (distance <= constants.CHOID_ALIGNMENT_RADIUS) & (distance > 0) & valid_fov
+        cohes_ids = (distance <= constants.CHOID_COHESION_RADIUS)  & (distance > 0) & valid_fov
+        return avoid_ids, align_ids, cohes_ids
+
+    def _avoidance_force(self, away, distance, avoid_ids):
+        if not np.any(avoid_ids):
+            return np.zeros(2, dtype = np.float32)
+        d = distance[avoid_ids]
+        vels = constants.CHOID_AVOIDANCE_FORCE / d
+        dirs = away[avoid_ids] / d[:, np.newaxis]
+        return np.average(vels[:, np.newaxis] * dirs, axis = 0)
+
+    def _alignment_force(self, i, align_ids):
+        if not np.any(align_ids):
+            return np.zeros(2, dtype = np.float32)
+        return np.average(self.choids_vel[align_ids], axis = 0) - self.choids_vel[i]
+
+    def _cohesion_force(self, i, cohes_ids):
+        if not np.any(cohes_ids):
+            return np.zeros(2, dtype = np.float32)
+        return np.average(self.choids_pos[cohes_ids], axis = 0) - self.choids_pos[i]
+
+    def _goal_force(self, i, strength = 100):
+        goal = np.array(pygame.mouse.get_pos()) - self.choids_pos[i]
+        goal_norm = np.linalg.norm(goal)
+        if goal_norm == 0:
+            return np.zeros(2, dtype = np.float32)
+        return goal / goal_norm * strength
+
+    def _limit_speed(self, i):
+        norm = np.linalg.norm(self.choids_vel[i], axis = 0)
+        if norm == 0:
+            return
+        units = self.choids_vel[i] / norm
+        norm  = min(norm, self.choid_max_speed[i])
+        self.choids_vel[i] = units * norm
+
+    def _update_choid_velocity(self, i, choid):
+        away = choid - self.choids_pos
+        distance = np.linalg.norm(away, axis = 1)
+
+        vects  = self.choids_pos - choid
+        angles = np.abs(np.arctan2(vects[:, 1], vects[:, 0]))
+        valid_fov = angles < (3.14159265358979323846264338327950288419716939937510582097494459 * 0.7)
+
+        avoid_ids, align_ids, cohes_ids = self._neighbor_masks(distance, valid_fov)
+
+        avoidance = self._avoidance_force(away, distance, avoid_ids)
+        alignment = self._alignment_force(i, align_ids)
+        cohesion  = self._cohesion_force(i, cohes_ids)
+        goal      = self._goal_force(i)
+
+        self.choids_vel[i] = self.choids_vel[i] * 0.8 + (goal + self.choids_vel[i] + avoidance + alignment + cohesion) * 0.3
+        self._limit_speed(i)
+
+    def _wrap_positions(self):
+        for i in range(2):
+            self.choids_pos[:,i][self.choids_pos[:,i] > constants.SCREEN_SIZE[i]] = 0
+            self.choids_pos[:,i][self.choids_pos[:,i] < 0] = constants.SCREEN_SIZE[i]
+
     def update(self, delta_t: float) -> None:
 
         for i, choid in enumerate(self.choids_pos):
-
-            away = choid - self.choids_pos.copy()
-
-            distance  = np.linalg.norm(away, axis = 1)
-            valid_ids = (distance <= constants.CHOID_AVOIDANCE_RADIUS) & (distance > 0)
-
-            vects  = self.choids_pos - choid
-            angles = np.arctan2(vects[:, 1], vects[:, 0])
-            angles = np.abs(angles)
-
-            valid_ids = valid_ids & (angles < (3.14159265358979323846264338327950288419716939937510582097494459 * 0.7))
-
-            away = away[valid_ids]
-            distance  = distance[valid_ids]
-
-            vels = constants.CHOID_AVOIDANCE_FORCE / distance
-            dirs = away / distance[:,np.newaxis]
-
-            avoidance = np.average(vels[:, np.newaxis] * dirs, axis = 0)
-            alignment = np.average(self.choids_vel[valid_ids], axis = 0) - self.choids_vel[i]
-            cohesion  = np.average(self.choids_pos[valid_ids]) - self.choids_pos[i]
-
-            self.choids_vel[i] = self.choids_vel[i] * 0.8 + (self.choids_vel[i] + avoidance + alignment + cohesion) * 0.3
-
-            norm  = np.linalg.norm(self.choids_vel[i], axis = 0)
-            units = self.choids_vel[i] / norm
-
-            if norm > self.choid_max_speed[i]:
-                norm = self.choid_max_speed[i]
-
-            self.choids_vel[i] = units * norm
+            self._update_choid_velocity(i, choid)
 
         self.choids_pos += self.choids_vel * delta_t
-        self.choids_pos = np.fmod(self.choids_pos, constants.SCREEN_SIZE)
-        for i in range(2):
-            self.choids_pos[:,i][self.choids_pos[:,i] < i] = constants.SCREEN_SIZE[i]
-        #self.choids_pos[0] = np.array(pygame.mouse.get_pos())
+        self._wrap_positions()
 
         return None
 
     def display(self, screen: pygame.display) -> None:
 
         for pos, vel in zip(self.choids_pos, self.choids_vel):
+            break
             pygame.draw.aaline(screen, "green", pos.astype(np.int64), pos + vel, 2)
 
         for pos in self.choids_pos:
@@ -79,7 +109,7 @@ class ChoidManager:
 
 def main() -> None:
 
-    screen = pygame.display.set_mode(constants.SCREEN_SIZE, pygame.RESIZABLE)
+    screen = pygame.display.set_mode(constants.SCREEN_SIZE)
     abort  = False
     choid_manager = ChoidManager(350)
     frame_durations, delta_t = get_frame_durations_delta_t()
