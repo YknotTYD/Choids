@@ -19,10 +19,9 @@ def get_new_delta_t_frame_durations(frame_durations: list, frame_start: float) -
 
     return (delta_t, frame_durations_cpy)
 
-def fill_background(screen: pygame.display) -> None:
+def fill_background(screen: pygame.Surface) -> None:
 
-    pygame.draw.rect(screen, constants.BACKGROUND_COLOR, (0, 0, *constants.SCREEN_SIZE))
-    #screen.draw.rect(constants.BACKGROUND_COLOR)
+    screen.fill(constants.BACKGROUND_COLOR)
 
     for index in range(2):
         val = constants.BACKGROUND_GRID_SPACING
@@ -46,3 +45,28 @@ def scale_to_screen_size(window_surface, screen: pygame.Surface) -> None:
     scaled = pygame.transform.smoothscale_by(screen, scale)
     window_surface.blit(scaled, (0, 0))
     return None
+
+def process_events(
+    window:     pygame.Window,
+    abort:      bool,
+    fullscreen: bool
+) -> tuple[bool, bool]:
+
+    for event in pygame.event.get():
+
+        if event.type == pygame.QUIT:
+            abort = True
+            break
+
+        if event.type == pygame.WINDOWMAXIMIZED:
+            fullscreen = True
+
+        if event.type == pygame.WINDOWRESIZED:
+
+            if fullscreen:
+                fullscreen = False
+                continue
+
+            window.size = get_window_size(window)
+
+    return (abort, fullscreen)

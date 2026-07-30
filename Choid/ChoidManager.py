@@ -251,6 +251,10 @@ class ChoidManager:
             left  = pos + np.array([np.cos(left), np.sin(left)])   * constants.CHOID_RENDER_W / 2
             right = pos + np.array([np.cos(right), np.sin(right)]) * constants.CHOID_RENDER_W / 2
 
+            top   -= norm * constants.CHOID_RENDER_H / 2
+            left  -= norm * constants.CHOID_RENDER_H / 2
+            right -= norm * constants.CHOID_RENDER_H / 2
+
             if i >= len(self.last_forces[_FORCES[self.current_last_force]]): # just in case
                 color = "white"
             else:
