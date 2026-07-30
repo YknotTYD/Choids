@@ -200,7 +200,6 @@ class ChoidUI:
         cross_len = constants.CROSS_LEN / 2
 
         for t, color in zip(constants.CROSS_TICKNESSES, constants.CROSS_COLORS):
-
             pygame.draw.line(screen, color,
                 (int(screen_center[0]) - cross_len, int(screen_center[1]) - cross_len),
                 (int(screen_center[0]) + cross_len, int(screen_center[1]) + cross_len),

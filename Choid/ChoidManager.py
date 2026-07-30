@@ -265,7 +265,7 @@ class ChoidManager:
             left  -= norm * constants.CHOID_RENDER_H / 2
             right -= norm * constants.CHOID_RENDER_H / 2
 
-            if i >= len(self.last_forces[_FORCES[self.current_last_force]]): # just in case
+            if i >= len(self.last_forces[_FORCES[self.current_last_force]]):
                 color = "white"
             else:
                 color_range = constants.CHOID_RENDER_FORCE_COLOR_RANGE[_FORCES[self.current_last_force]]
