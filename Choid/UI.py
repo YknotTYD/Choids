@@ -42,26 +42,22 @@ def _modify_time_scaling(self, value: int, choid_manager: Choid.ChoidManager) ->
     constants.TIME_SCALING_FACTOR = round(constants.TIME_SCALING_FACTOR, 1)
     constants.TIME_SCALING_FACTOR = max(constants.TIME_SCALING_FACTOR, 0)
 
-    #choid_manager.current_last_force += value
-    #choid_manager.current_last_force %= len(constants.FORCES)
-    #choid_manager.current_last_force  = max(choid_manager.current_last_force, 0)
-
     return None
 
 LINE_COUNT = 12
 MODIFICATION_TABLE = {
-    0:  None,#(1, 0, f"mouse : {pygame.mouse.get_pos()}"),
-    1:  None,#(1, 1, f"choids: {choid_manager.choid_count}"),
-    2:  _modify_avoidance_radius,#(1, 1, f"avoidance radius: {constants.CHOID_AVOIDANCE_RADIUS}"),
-    3:  _modify_alignment_radius,#(1, 1, f"alignment radius: {constants.CHOID_ALIGNMENT_RADIUS}"),
-    4:  _modify_cohesion_radius,#(1, 1, f"cohesion  radius: {constants.CHOID_COHESION_RADIUS}"),
-    5:  _modify_choid_fov,#(1, 0, f"choid fov: {constants.CHOID_FOV}%"),
-    6:  None,#(1, 0, f"speed min: {speeds.min():.0f}"),
-    7:  None,#(1, 0, f"speed avg: {speeds.mean():.0f}"),
-    8:  None,#(1, 0, f"speed max: {speeds.max():.0f}"),
-    9:  None,#(1, 0, f"framerate: {round(1 / delta_t, 1)} fps"),
-    10: _modify_current_force,#(1, 0, f"current force: {constants.FORCES[choid_manager.current_last_force]}"),
-    11: _modify_time_scaling,#(1, 0, f"current force: {constants.FORCES[choid_manager.current_last_force]}"),
+    0:  None,                     #(1, 0, f"mouse : {pygame.mouse.get_pos()}"),
+    1:  None,                     #(1, 1, f"choids: {choid_manager.choid_count}"),
+    2:  _modify_avoidance_radius, #(1, 1, f"avoidance radius: {constants.CHOID_AVOIDANCE_RADIUS}"),
+    3:  _modify_alignment_radius, #(1, 1, f"alignment radius: {constants.CHOID_ALIGNMENT_RADIUS}"),
+    4:  _modify_cohesion_radius,  #(1, 1, f"cohesion  radius: {constants.CHOID_COHESION_RADIUS}"),
+    5:  _modify_choid_fov,        #(1, 0, f"choid fov: {constants.CHOID_FOV}%"),
+    6:  None,                     #(1, 0, f"speed min: {speeds.min():.0f}"),
+    7:  None,                     #(1, 0, f"speed avg: {speeds.mean():.0f}"),
+    8:  None,                     #(1, 0, f"speed max: {speeds.max():.0f}"),
+    9:  None,                     #(1, 0, f"framerate: {round(1 / delta_t, 1)} fps"),
+    10: _modify_current_force,    #(1, 0, f"current force: {constants.FORCES[choid_manager.current_last_force]}"),
+    11: _modify_time_scaling,     #(1, 0, f"current force: {constants.FORCES[choid_manager.current_last_force]}"),
 
 }
 
@@ -70,6 +66,7 @@ class ChoidUI:
     def __init__(self) -> None:
         self.cursor_index = 0
         self.follow_index = None
+        self.hide_panel   = False
         return None
 
     def _send_modification(self, value: int, choid_manager: Choid.ChoidManager) -> None:
@@ -100,11 +97,14 @@ class ChoidUI:
         if pressed[pygame.K_RIGHT]:
             self._send_modification( 1, choid_manager)
 
-        if pressed[pygame.K_RETURN] or pressed[pygame.K_SPACE]:
+        if pressed[pygame.K_RETURN]:
             self.follow_index = (
                 None if self.follow_index is not None
                     else random.randrange(choid_manager.choid_count)
             )
+
+        if pressed[pygame.K_SPACE]:
+            self.hide_panel = not(self.hide_panel)
 
         return None
 
@@ -123,16 +123,16 @@ class ChoidUI:
             choid_manager: Choid.ChoidManager
         ) -> None:
 
+        screen_center = choid_manager.choids_pos[self.follow_index]
         blit_pos = [
-            int(choid - constants.SCREEN_SIZE[i] / (constants.FOLLOW_SCALING_FACTOR * 2))
-                for i, choid in enumerate(choid_manager.choids_pos[self.follow_index])
+            int(coord - constants.SCREEN_SIZE[i] / (constants.FOLLOW_SCALING_FACTOR * 2))
+                for i, coord in enumerate(screen_center)
         ]
 
         zoom = pygame.Surface(constants.SCREEN_SIZE)
         zoom.blit(screen, (0, 0, *constants.SCREEN_SIZE), (*blit_pos, *constants.SCREEN_SIZE))
         zoom = pygame.transform.smoothscale_by(zoom, constants.FOLLOW_SCALING_FACTOR)
         screen.blit(zoom, (0, 0), (0, 0, *constants.SCREEN_SIZE))
-        # choid_manager.choids_pos[self.follow_index]
 
         return None
 
@@ -143,6 +143,9 @@ class ChoidUI:
 
         if self.follow_index is not None:
             self._scale_to_follow(screen, choid_manager)
+            return None
+
+        if self.hide_panel:
             return None
 
         speeds = np.linalg.norm(choid_manager.choids_vel, axis = 1)
@@ -168,8 +171,10 @@ class ChoidUI:
             (0, 0, "   move cursor"    ),
             (0, 0, "[left/right]:"     ),
             (0, 0, "   modify value"   ),
-            (0, 0, "[enter/space]:"    ),
-            (0, 0, "   follow/unfollow")
+            (0, 0, "[enter]:"    ),
+            (0, 0, "   follow/unfollow"),
+            (0, 0, "[space]:"    ),
+            (0, 0, "   hide/unhide panel"),
         ]
 
         padding = 8
