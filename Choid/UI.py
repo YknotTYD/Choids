@@ -44,10 +44,64 @@ def _modify_time_scaling(self, value: int, choid_manager: Choid.ChoidManager) ->
 
     return None
 
-LINE_COUNT = 12
+def _modify_follow_scaling(self, value: int, choid_manager: Choid.ChoidManager) -> None:
+
+    constants.FOLLOW_SCALING_FACTOR += value * 0.2
+    constants.FOLLOW_SCALING_FACTOR  = round(constants.FOLLOW_SCALING_FACTOR, 1)
+    constants.FOLLOW_SCALING_FACTOR  = max(constants.FOLLOW_SCALING_FACTOR, 1)
+    constants.FOLLOW_SCALING_FACTOR  = min(constants.FOLLOW_SCALING_FACTOR, 4)
+
+    return None
+
+def _choid_count_to_amount(count: int) -> int:
+    if count <= 10:
+        return 1
+    if count <= 75:
+        return 5
+    if count <= 150:
+        return 10
+    return 20
+
+def _modify_choid_count(self, value: int, choid_manager: Choid.ChoidManager) -> None:
+
+    choid_amount = _choid_count_to_amount(choid_manager.choid_count)
+
+    if value == 1:
+
+        new_pos = np.random.randint(0, 1000, (choid_amount, 2)).astype(np.float32)
+        new_vel = (np.random.random((choid_amount, 2)) - 0.5) * 150
+        new_max_speed = np.random.randint(
+            constants.CHOID_SPEED_RANGE[0],
+            constants.CHOID_SPEED_RANGE[1] + 1,
+            choid_amount
+        )
+
+        choid_manager.choids_pos      = np.concat((choid_manager.choids_pos, new_pos), axis = 0)
+        choid_manager.choids_vel      = np.concat((choid_manager.choids_vel, new_vel), axis = 0)
+        choid_manager.choid_max_speed = np.concat((choid_manager.choid_max_speed, new_max_speed), axis = 0)
+        choid_manager.choid_count    += choid_amount
+
+        choid_manager._remove_choids_from_obstacles()
+
+        return None
+
+    if value != -1:
+        return None
+
+    if choid_amount >= choid_manager.choid_count:
+        return None
+
+    choid_manager.choids_pos      = choid_manager.choids_pos[:-choid_amount]
+    choid_manager.choids_vel      = choid_manager.choids_vel[:-choid_amount]
+    choid_manager.choid_max_speed = choid_manager.choid_max_speed[:-choid_amount]
+    choid_manager.choid_count    -= choid_amount
+
+    return None
+
+LINE_COUNT = 13
 MODIFICATION_TABLE = {
     0:  None,                     #(1, 0, f"mouse : {pygame.mouse.get_pos()}"),
-    1:  None,                     #(1, 1, f"choids: {choid_manager.choid_count}"),
+    1:  _modify_choid_count,      #(1, 1, f"choids: {choid_manager.choid_count}"),
     2:  _modify_avoidance_radius, #(1, 1, f"avoidance radius: {constants.CHOID_AVOIDANCE_RADIUS}"),
     3:  _modify_alignment_radius, #(1, 1, f"alignment radius: {constants.CHOID_ALIGNMENT_RADIUS}"),
     4:  _modify_cohesion_radius,  #(1, 1, f"cohesion  radius: {constants.CHOID_COHESION_RADIUS}"),
@@ -57,8 +111,8 @@ MODIFICATION_TABLE = {
     8:  None,                     #(1, 0, f"speed max: {speeds.max():.0f}"),
     9:  None,                     #(1, 0, f"framerate: {round(1 / delta_t, 1)} fps"),
     10: _modify_current_force,    #(1, 0, f"current force: {constants.FORCES[choid_manager.current_last_force]}"),
-    11: _modify_time_scaling,     #(1, 0, f"current force: {constants.FORCES[choid_manager.current_last_force]}"),
-
+    11: _modify_time_scaling,     #(1, 1, f"time scaling:  {constants.TIME_SCALING_FACTOR}"),
+    12: _modify_follow_scaling,   #(1, 1, f"spectating scaling: {constants.FOLLOW_SCALING_FACTOR}"),
 }
 
 class ChoidUI:
@@ -166,7 +220,7 @@ class ChoidUI:
         lines = [
             (1, 0, f"mouse : {pygame.mouse.get_pos()}"),
             (0, 0, ""),
-            (1, 0, f"choids: {choid_manager.choid_count}"),
+            (1, 1, f"choids: {choid_manager.choid_count}"),
             (1, 1, f"avoidance radius: {constants.CHOID_AVOIDANCE_RADIUS}"),
             (1, 1, f"alignment radius: {constants.CHOID_ALIGNMENT_RADIUS}"),
             (1, 1, f"cohesion  radius: {constants.CHOID_COHESION_RADIUS}" ),
@@ -178,6 +232,7 @@ class ChoidUI:
             (1, 0, f"framerate: {round(1 / delta_t, 1)} fps"),
             (1, 1, f"current force: {constants.FORCES[choid_manager.current_last_force]}"),
             (1, 1, f"time scaling:  {constants.TIME_SCALING_FACTOR}"),
+            (1, 1, f"spectating scaling: {constants.FOLLOW_SCALING_FACTOR}"),
             (0, 0, ""                        ),
             (0, 0, "[controls]:"             ),
             (0, 0, ""                        ),

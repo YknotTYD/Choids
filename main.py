@@ -11,8 +11,8 @@ from   helpers import (
     get_window_size, process_events
 )
 
-# TODO: add goal count + minimum/maximum speed + choid count to the panel
-# TODO: make follow scaling modifiable
+# TODO: make subfuntions to get new pos/vel/speed values
+# TODO: add goal count to the panel
 
 def main() -> None:
 
