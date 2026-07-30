@@ -191,6 +191,28 @@ class ChoidUI:
             ) * constants.CHOID_RENDER_TRIANGLE_AMPLITUDE
         )
 
+    def _draw_cross(
+            self,
+            screen: pygame.Surface,
+            screen_center: np.array
+        ) -> None:
+
+        cross_len = constants.CROSS_LEN / 2
+
+        for t, color in zip(constants.CROSS_TICKNESSES, constants.CROSS_COLORS):
+
+            pygame.draw.line(screen, color,
+                (int(screen_center[0]) - cross_len, int(screen_center[1]) - cross_len),
+                (int(screen_center[0]) + cross_len, int(screen_center[1]) + cross_len),
+                t
+            )
+            pygame.draw.line(screen, color,
+                (int(screen_center[0]) + cross_len, int(screen_center[1]) - cross_len),
+                (int(screen_center[0]) - cross_len, int(screen_center[1]) + cross_len),
+                t
+            )
+        return None
+
     def _scale_to_follow(
             self,
             screen: pygame.Surface,
@@ -207,7 +229,7 @@ class ChoidUI:
             for i in range(2)
         ]
 
-        pygame.draw.circle(screen, "blue", (int(screen_center[0]), int(screen_center[1])), 5)
+        self._draw_cross(screen, screen_center)
 
         for i, bounds in enumerate(center_xy_bounds):
             screen_center[i] = max(min(screen_center[i], bounds[0]), bounds[1])
