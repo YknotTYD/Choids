@@ -8,27 +8,27 @@ import math
 import time
 import random
 
-def _modify_avoidance_radius(self, value: int, choid_manager: Choid.ChoidManager) -> None:
+def _modify_avoidance_radius(value: int, choid_manager: Choid.ChoidManager) -> None:
     constants.CHOID_AVOIDANCE_RADIUS += value * 25
     constants.CHOID_AVOIDANCE_RADIUS  = max(constants.CHOID_AVOIDANCE_RADIUS, 0)
     return None
 
-def _modify_alignment_radius(self, value: int, choid_manager: Choid.ChoidManager) -> None:
+def _modify_alignment_radius(value: int, choid_manager: Choid.ChoidManager) -> None:
     constants.CHOID_ALIGNMENT_RADIUS += value * 25
     constants.CHOID_ALIGNMENT_RADIUS  = max(constants.CHOID_ALIGNMENT_RADIUS, 0)
     return None
 
-def _modify_cohesion_radius(self, value: int, choid_manager: Choid.ChoidManager) -> None:
+def _modify_cohesion_radius(value: int, choid_manager: Choid.ChoidManager) -> None:
     constants.CHOID_COHESION_RADIUS += value * 25
     constants.CHOID_COHESION_RADIUS  = max(constants.CHOID_COHESION_RADIUS, 0)
     return None
 
-def _modify_choid_fov(self, value: int, choid_manager: Choid.ChoidManager) -> None:
+def _modify_choid_fov(value: int, choid_manager: Choid.ChoidManager) -> None:
     constants.CHOID_FOV += value * 15
     constants.CHOID_FOV  = min(max(constants.CHOID_FOV, 0), 360)
     return None
 
-def _modify_current_force(self, value: int, choid_manager: Choid.ChoidManager) -> None:
+def _modify_current_force(value: int, choid_manager: Choid.ChoidManager) -> None:
 
     choid_manager.current_last_force += value
     choid_manager.current_last_force %= len(constants.FORCES)
@@ -36,7 +36,7 @@ def _modify_current_force(self, value: int, choid_manager: Choid.ChoidManager) -
 
     return None
 
-def _modify_time_scaling(self, value: int, choid_manager: Choid.ChoidManager) -> None:
+def _modify_time_scaling(value: int, choid_manager: Choid.ChoidManager) -> None:
 
     if value == 1:
         value *= 0.1 if constants.TIME_SCALING_FACTOR < 1.0 else 0.2
@@ -51,7 +51,7 @@ def _modify_time_scaling(self, value: int, choid_manager: Choid.ChoidManager) ->
 
     return None
 
-def _modify_follow_scaling(self, value: int, choid_manager: Choid.ChoidManager) -> None:
+def _modify_follow_scaling(value: int, choid_manager: Choid.ChoidManager) -> None:
 
     constants.FOLLOW_SCALING_FACTOR += value * 0.2
     constants.FOLLOW_SCALING_FACTOR  = round(constants.FOLLOW_SCALING_FACTOR, 1)
@@ -69,7 +69,7 @@ def _choid_count_to_amount(count: int) -> int:
         return 10
     return 20
 
-def _modify_choid_count(self, value: int, choid_manager: Choid.ChoidManager) -> None:
+def _modify_choid_count(value: int, choid_manager: Choid.ChoidManager) -> None:
 
     choid_amount = _choid_count_to_amount(choid_manager.choid_count)
 
@@ -99,7 +99,7 @@ def _modify_choid_count(self, value: int, choid_manager: Choid.ChoidManager) -> 
     choid_manager.choid_count    -= choid_amount
     return None
 
-def _modify_goal_count(self, value: int, choid_manager: Choid.ChoidManager) -> None:
+def _modify_goal_count(value: int, choid_manager: Choid.ChoidManager) -> None:
 
     if value == 1:
 
@@ -117,23 +117,32 @@ def _modify_goal_count(self, value: int, choid_manager: Choid.ChoidManager) -> N
 
     return None
 
-LINE_COUNT = 14
-MODIFICATION_TABLE = {
-    0:  None,                     #mouse
-    1:  _modify_choid_count,      #choids
-    2:  _modify_goal_count,       #food
-    3:  _modify_avoidance_radius, #avoidance radius
-    4:  _modify_alignment_radius, #alignment radius
-    5:  _modify_cohesion_radius,  #cohesion  radius
-    6:  _modify_choid_fov,        #choid fov
-    7:  None,                     #speed min
-    8:  None,                     #speed avg
-    9:  None,                     #speed max
-    10: None,                     #framerate
-    11: _modify_current_force,    #current force
-    12: _modify_time_scaling,     #time scaling
-    13: _modify_follow_scaling,   #spectating scaling
-}
+def _modify_step_count(value: int, choid_manager: Choid.ChoidManager) -> None:
+
+    if abs(value) != 1:
+        return None
+
+    constants.STEPS_PER_FRAME = min(max(constants.STEPS_PER_FRAME + value, 0), 10)
+    return None
+
+LINE_COUNT = 16
+MODIFICATION_TABLE = [
+    None,                     # mouse
+    _modify_choid_count,      # choids
+    _modify_goal_count,       # food
+    _modify_avoidance_radius, # avoidance radius
+    _modify_alignment_radius, # alignment radius
+    _modify_cohesion_radius,  # cohesion  radius
+    _modify_choid_fov,        # choid fov
+    None,                     # speed min
+    None,                     # speed avg
+    None,                     # speed max
+    None,                     # framerate
+    _modify_current_force,    # current force
+    _modify_time_scaling,     # time scaling
+    _modify_step_count,       # step count
+    _modify_follow_scaling,   # spectating scaling
+]
 
 class ChoidUI:
 
@@ -150,7 +159,7 @@ class ChoidUI:
         if func is None:
             return None
 
-        func(self, value, choid_manager)
+        func(value, choid_manager)
         return None
 
     def update(self, choid_manager: Choid.ChoidManager) -> None:
@@ -272,8 +281,9 @@ class ChoidUI:
             (1, 0, f"speed avg: {speeds.mean():.0f}"   ),
             (1, 0, f"speed max: {speeds.max():.0f}"    ),
             (1, 0, f"framerate: {round(1 / delta_t, 1)} fps"),
-            (1, 1, f"current force: {constants.FORCES[choid_manager.current_last_force]}"),
-            (1, 1, f"time scaling:  {constants.TIME_SCALING_FACTOR}"),
+            (1, 1, f"current force:   {constants.FORCES[choid_manager.current_last_force]}"),
+            (1, 1, f"time scaling:    {constants.TIME_SCALING_FACTOR}"),
+            (1, 1, f"step count:      {constants.STEPS_PER_FRAME}"),
             (1, 1, f"spectating scaling: {constants.FOLLOW_SCALING_FACTOR}"),
             (0, 0, ""                        ),
             (0, 0, "[controls]:"             ),
@@ -290,7 +300,7 @@ class ChoidUI:
 
         padding = 8
         line_height = 20
-        box_w = 280 + 24
+        box_w = 290 + 24
         box_h = padding * 2 + line_height * len(lines)
 
         panel = pygame.Surface((box_w, box_h), pygame.SRCALPHA)

@@ -10,8 +10,19 @@ from   helpers import (
     fill_background, scale_to_screen_size, process_events
 )
 
+# TODO: oppitmize stuff
 # TODO: proper documentation
 # TODO: prevent choids from spawning into each other
+# TODO: split time scaling into multiple steps for stability
+# TODO: increase food attraction exponentionally as they get close
+# TODO: make some of the sliders is_pressed-based instead of just_pressed-based
+# TODO: an edit mode to add/delete obstacles
+# TODO: make choids avoid obstacles from farther
+# TODO: add line segments as obstacles
+# TODO: compile to WASM?
+# TODO: segmented map optimization
+# TODO: color panel values differently
+# TODO: multi-threading
 
 def main() -> None:
 

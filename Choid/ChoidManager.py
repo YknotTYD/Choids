@@ -222,22 +222,31 @@ class ChoidManager:
 
         return None
 
-    def _update_last_force(self) -> None:
+    def _reset_last_force(self) -> None:
 
         for key in self.last_forces.keys():
             self.last_forces[key] = []
 
         return None
 
-    def update(self, delta_t: float) -> None:
+    def _step(self, delta_t: float) -> None:
 
-        self._update_last_force()
+        self._reset_last_force()
 
         for i, choid in enumerate(self.choids_pos):
             self._update_choid_velocity(i, choid)
 
-        self.choids_pos += self.choids_vel * delta_t * constants.TIME_SCALING_FACTOR
+        self.choids_pos += self.choids_vel * delta_t
         self._wrap_positions()
+        return None
+
+    def update(self, delta_t: float) -> None:
+
+        step_size  = delta_t / constants.STEPS_PER_FRAME
+        step_size *= constants.TIME_SCALING_FACTOR
+
+        for i in range(constants.STEPS_PER_FRAME):
+            self._step(step_size)
 
         return None
 
